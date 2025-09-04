@@ -8,7 +8,7 @@
 
 ## 🌐 Live Demo
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://zoom-video-call-demo.vercel.app/)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://apnacollegezoombackend.onrender.com)
 
 **Try it now:** Join video calls, share screens, and collaborate in real-time!
 
