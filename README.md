@@ -8,7 +8,7 @@
 
 ## 🌐 Live Demo
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-4285F4?style=for-the-badge&logo=google-chrome&logoColor=white)](https://apnacollegezoombackend.onrender.com)
+**🔗 Live Application:** [https://apnacollegezoombackend.onrender.com](https://apnacollegezoombackend.onrender.com)
 
 **Try it now:** Join video calls, share screens, and collaborate in real-time!
 
@@ -161,6 +161,11 @@ npm start
 
 ## 📄 License
 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+⭐ **If this project helped you, please consider giving it a star!**
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
