@@ -12,7 +12,7 @@
 
 **Try it now:** Join video calls, share screens, and collaborate in real-time!
 
-## 🚀 Features
+## Features
 
 - **📞 HD Video Calls** - Crystal clear video communication
 - **🎙️ Audio Controls** - Mute/unmute with noise cancellation
