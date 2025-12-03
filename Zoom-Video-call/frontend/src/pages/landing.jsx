@@ -21,47 +21,51 @@ export default function LandingPage() {
         <Box sx={{
             minHeight: '100vh',
             bgcolor: 'background.default',
-            backgroundImage: 'url("/background.png")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
             display: 'flex',
             flexDirection: 'column'
         }}>
             <AppBar position="static" color="transparent" elevation={0} sx={{ pt: 2 }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
-                        <Typography
-                            variant="h5"
-                            noWrap
-                            component="div"
-                            sx={{
-                                fontWeight: 700,
-                                color: 'white',
-                                letterSpacing: '.1rem'
-                            }}
-                        >
-                            Apna Video Call
-                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box
+                                component="img"
+                                src="/logo.png"
+                                alt="Fliq Logo"
+                                sx={{ height: 40, width: 'auto' }}
+                            />
+                            <Typography
+                                variant="h5"
+                                noWrap
+                                component="div"
+                                sx={{
+                                    fontWeight: 700,
+                                    color: '#9c27b0', // Purple color
+                                    letterSpacing: '.1rem'
+                                }}
+                            >
+                                Fliq
+                            </Typography>
+                        </Box>
 
                         <Box sx={{ display: 'flex', gap: 2 }}>
                             <Button
-                                onClick={() => router("/aljk23")}
-                                sx={{ color: 'white' }}
-                            >
-                                Join as Guest
-                            </Button>
-                            <Button
+                                variant="outlined"
                                 onClick={() => router("/auth")}
-                                sx={{ color: 'white' }}
+                                sx={{
+                                    color: '#9c27b0',
+                                    borderColor: '#9c27b0',
+                                    '&:hover': { borderColor: '#7b1fa2', bgcolor: 'rgba(156, 39, 176, 0.04)' }
+                                }}
                             >
-                                Register
+                                Sign Up
                             </Button>
                             <Button
                                 variant="contained"
                                 onClick={() => router("/auth")}
                                 sx={{
-                                    bgcolor: '#FF9839',
-                                    '&:hover': { bgcolor: '#e68a33' }
+                                    bgcolor: '#9c27b0',
+                                    '&:hover': { bgcolor: '#7b1fa2' }
                                 }}
                             >
                                 Login
@@ -71,45 +75,75 @@ export default function LandingPage() {
                 </Container>
             </AppBar>
 
-            <Container maxWidth="xl" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-                <Grid container spacing={4} alignItems="center">
+            <Container maxWidth="xl" sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', mt: 4 }}>
+                <Grid container spacing={8} alignItems="center">
                     <Grid item xs={12} md={6}>
-                        <Box sx={{ textAlign: { xs: 'center', md: 'left' }, color: 'white' }}>
-                            <Typography variant={isMobile ? "h3" : "h2"} component="h1" fontWeight="bold" gutterBottom>
-                                <span style={{ color: "#FF9839" }}>Connect</span> with your loved Ones
+                        <Box sx={{ textAlign: { xs: 'center', md: 'left' } }}>
+                            <Typography variant={isMobile ? "h3" : "h2"} component="h1" fontWeight="bold" gutterBottom sx={{ color: '#333' }}>
+                                Seamless Video Calling with Fliq
                             </Typography>
-                            <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
-                                Cover a distance by Apna Video Call
+                            <Typography variant="h6" sx={{ mb: 4, color: '#666', lineHeight: 1.6 }}>
+                                Experience high-quality video calls with no hassle. Connect with friends, family, or colleagues instantly with just one click.
                             </Typography>
-                            <Button
-                                variant="contained"
-                                size="large"
-                                onClick={() => router("/auth")}
-                                sx={{
-                                    bgcolor: '#FF9839',
-                                    fontSize: '1.2rem',
-                                    px: 4,
-                                    py: 1.5,
-                                    borderRadius: '50px',
-                                    '&:hover': { bgcolor: '#e68a33' }
-                                }}
-                            >
-                                Get Started
-                            </Button>
+                            <Box sx={{ display: 'flex', gap: 2, justifyContent: { xs: 'center', md: 'flex-start' } }}>
+                                <Button
+                                    variant="outlined"
+                                    size="large"
+                                    onClick={() => router("/aljk23")}
+                                    sx={{
+                                        color: '#9c27b0',
+                                        borderColor: '#9c27b0',
+                                        fontSize: '1.1rem',
+                                        px: 4,
+                                        py: 1.5,
+                                        '&:hover': { borderColor: '#7b1fa2', bgcolor: 'rgba(156, 39, 176, 0.04)' }
+                                    }}
+                                >
+                                    Join as Guest
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    size="large"
+                                    onClick={() => router("/auth")}
+                                    sx={{
+                                        bgcolor: '#9c27b0',
+                                        fontSize: '1.1rem',
+                                        px: 4,
+                                        py: 1.5,
+                                        '&:hover': { bgcolor: '#7b1fa2' }
+                                    }}
+                                >
+                                    Get Started
+                                </Button>
+                            </Box>
                         </Box>
                     </Grid>
                     <Grid item xs={12} md={6} sx={{ display: 'flex', justifyContent: 'center' }}>
                         <Box
-                            component="img"
-                            src="/mobile.png"
-                            alt="Video Call App Interface"
                             sx={{
-                                maxWidth: '100%',
-                                height: 'auto',
-                                maxHeight: '80vh',
-                                display: { xs: 'none', md: 'block' } // Hide on very small screens if needed, or adjust
+                                position: 'relative',
+                                width: '100%',
+                                maxWidth: '600px',
+                                aspectRatio: '4/3',
+                                bgcolor: '#f5f5f5',
+                                borderRadius: 4,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
                             }}
-                        />
+                        >
+                            <Box
+                                component="img"
+                                src="/mobile.png"
+                                alt="Video Call Illustration"
+                                sx={{
+                                    maxWidth: '90%',
+                                    height: 'auto',
+                                    display: 'block'
+                                }}
+                            />
+                        </Box>
                     </Grid>
                 </Grid>
             </Container>
