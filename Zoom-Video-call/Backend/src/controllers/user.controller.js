@@ -98,4 +98,37 @@ const addToHistory = async (req, res) => {
 }
 
 
-export { login, register, getUserHistory, addToHistory }
+const googleAuth = async (req, res) => {
+    const { name, username, email } = req.body;
+
+    try {
+        const existingUser = await User.findOne({ username });
+
+        if (existingUser) {
+            // User exists, generate token and login
+            let token = crypto.randomBytes(20).toString("hex");
+            existingUser.token = token;
+            await existingUser.save();
+            return res.status(httpStatus.OK).json({ token: token });
+        } else {
+            // Create new user
+            const newUser = new User({
+                name: name,
+                username: username,
+                email: email,
+                // No password for Google Auth users
+            });
+
+            let token = crypto.randomBytes(20).toString("hex");
+            newUser.token = token;
+
+            await newUser.save();
+            return res.status(httpStatus.OK).json({ token: token });
+        }
+
+    } catch (e) {
+        return res.status(500).json({ message: `Something went wrong ${e}` })
+    }
+}
+
+export { login, register, getUserHistory, addToHistory, googleAuth }

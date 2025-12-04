@@ -14,6 +14,8 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AuthContext } from '../contexts/AuthContext';
 import { Snackbar } from '@mui/material';
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 
 
 
@@ -23,7 +25,7 @@ const defaultTheme = createTheme();
 
 export default function Authentication() {
 
-    
+
 
     const [username, setUsername] = React.useState();
     const [password, setPassword] = React.useState();
@@ -37,7 +39,7 @@ export default function Authentication() {
     const [open, setOpen] = React.useState(false)
 
 
-    const { handleRegister, handleLogin } = React.useContext(AuthContext);
+    const { handleRegister, handleLogin, handleGoogleLogin } = React.useContext(AuthContext);
 
     let handleAuth = async () => {
         try {
@@ -156,6 +158,23 @@ export default function Authentication() {
                             >
                                 {formState === 0 ? "Login " : "Register"}
                             </Button>
+
+                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                <GoogleLogin
+                                    onSuccess={async (credentialResponse) => {
+                                        try {
+                                            const decoded = jwtDecode(credentialResponse.credential);
+                                            await handleGoogleLogin(decoded.name, decoded.email, decoded.email);
+                                        } catch (err) {
+                                            console.log("Google Login Error:", err);
+                                            setError("Google Login Failed");
+                                        }
+                                    }}
+                                    onError={() => {
+                                        console.log('Login Failed');
+                                    }}
+                                />
+                            </Box>
 
                         </Box>
                     </Box>

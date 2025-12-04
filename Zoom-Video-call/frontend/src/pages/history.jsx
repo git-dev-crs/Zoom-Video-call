@@ -13,11 +13,15 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    Divider
+    Divider,
+    Button,
+    Paper
 } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import VideoCameraFrontIcon from '@mui/icons-material/VideoCameraFront';
 
 export default function History() {
     const { getHistoryOfUser } = useContext(AuthContext);
@@ -45,78 +49,149 @@ export default function History() {
     }
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f5f5f5' }}>
-            <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #eee' }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: '#f9fafb' }}>
+            <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)', p: 2 }}>
                 <Container maxWidth="xl">
-                    <Toolbar disableGutters>
-                        <IconButton
+                    <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }} onClick={() => navigate("/home")}>
+                            <Box
+                                component="img"
+                                src="/fliq_logo_white.png"
+                                alt="Fliqq Logo"
+                                sx={{ height: 40, width: 'auto' }}
+                            />
+                            <Typography
+                                component="h1"
+                                sx={{
+                                    fontSize: '1.5rem',
+                                    fontWeight: 800,
+                                    color: '#b588d9'
+                                }}
+                            >
+                                Fliqq
+                            </Typography>
+                        </Box>
+
+                        <Button
+                            startIcon={<HomeIcon />}
                             onClick={() => navigate("/home")}
-                            sx={{ color: '#9c27b0', mr: 2 }}
+                            sx={{
+                                color: '#9c27b0',
+                                bgcolor: '#f3e8ff',
+                                textTransform: 'none',
+                                fontWeight: 600,
+                                px: 2,
+                                borderRadius: 2,
+                                '&:hover': { bgcolor: '#e9d5ff' }
+                            }}
                         >
-                            <HomeIcon />
-                        </IconButton>
-                        <Typography variant="h6" fontWeight="bold" sx={{ color: '#333' }}>
-                            History
-                        </Typography>
+                            Back to Home
+                        </Button>
                     </Toolbar>
                 </Container>
             </AppBar>
 
-            <Container maxWidth="md" sx={{ mt: 4, pb: 8 }}>
-                <Typography variant="h5" fontWeight="bold" sx={{ mb: 3, textAlign: 'center' }}>
-                    History of your meetings
-                </Typography>
+            <Container maxWidth="md" sx={{ mt: 8, pb: 8 }}>
+                <Box sx={{ textAlign: 'center', mb: 6 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 800, color: '#111827', mb: 1 }}>
+                        Meeting History
+                    </Typography>
+                    <Typography variant="body1" sx={{ color: '#6b7280' }}>
+                        Track your past calls and see who attended.
+                    </Typography>
+                </Box>
 
                 {meetings.length > 0 ? (
                     meetings.map((e, i) => (
-                        <Card key={i} variant="outlined" sx={{ mb: 3, borderRadius: 2, borderColor: '#e0e0e0' }}>
-                            <CardContent>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                    <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
-                                        Code: {e.meetingCode}
-                                    </Typography>
-                                    <Typography variant="body2" color="text.secondary">
-                                        Date: {formatDate(e.date)}
-                                    </Typography>
-                                </Box>
-
-                                <Divider sx={{ my: 2 }} />
-
-                                <Accordion elevation={0} sx={{ '&:before': { display: 'none' } }}>
-                                    <AccordionSummary
-                                        expandIcon={<ExpandMoreIcon sx={{ color: '#9c27b0' }} />}
-                                        sx={{ px: 0, minHeight: 0, '& .MuiAccordionSummary-content': { m: 0 } }}
-                                    >
-                                        <Typography variant="button" sx={{ color: '#9c27b0', textTransform: 'none' }}>
-                                            Show Attendees
+                        <Paper
+                            key={i}
+                            elevation={0}
+                            sx={{
+                                mb: 3,
+                                borderRadius: 4,
+                                overflow: 'hidden',
+                                border: '1px solid #f3f4f6',
+                                transition: 'all 0.3s',
+                                '&:hover': {
+                                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                                    transform: 'translateY(-2px)'
+                                }
+                            }}
+                        >
+                            <Box sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                    <Box sx={{
+                                        width: 48,
+                                        height: 48,
+                                        borderRadius: '50%',
+                                        bgcolor: '#f3e8ff',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: '#9c27b0'
+                                    }}>
+                                        <VideoCameraFrontIcon />
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="subtitle1" fontWeight="bold" color="#1f2937">
+                                            {e.meetingCode}
                                         </Typography>
-                                    </AccordionSummary>
-                                    <AccordionDetails sx={{ px: 0 }}>
-                                        {/* Placeholder for attendees list if data structure allows, currently just showing a placeholder or mapping if available */}
-                                        {/* Assuming 'e.attendees' might exist in future or using dummy data for UI match */}
-                                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                            {/* Example Attendee Item */}
-                                            <Box sx={{ p: 2, bgcolor: '#fafafa', borderRadius: 1, border: '1px solid #eee' }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                                                    <PersonIcon fontSize="small" color="action" />
-                                                    <Typography variant="subtitle2" fontWeight="bold">
-                                                        Participant
-                                                    </Typography>
-                                                </Box>
-                                                <Typography variant="caption" display="block" color="text.secondary">
-                                                    Joined at: {formatDate(e.date)}
-                                                </Typography>
-                                            </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: '#6b7280' }}>
+                                            <CalendarTodayIcon sx={{ fontSize: 14 }} />
+                                            <Typography variant="caption">
+                                                {formatDate(e.date)}
+                                            </Typography>
                                         </Box>
-                                    </AccordionDetails>
-                                </Accordion>
-                            </CardContent>
-                        </Card>
+                                    </Box>
+                                </Box>
+                            </Box>
+
+                            <Accordion elevation={0} sx={{ '&:before': { display: 'none' }, bgcolor: 'transparent' }}>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMoreIcon sx={{ color: '#9c27b0' }} />}
+                                    sx={{
+                                        px: 3,
+                                        minHeight: 48,
+                                        borderTop: '1px solid #f3f4f6',
+                                        '& .MuiAccordionSummary-content': { m: 0 }
+                                    }}
+                                >
+                                    <Typography variant="button" sx={{ color: '#9c27b0', textTransform: 'none', fontWeight: 600 }}>
+                                        View Attendees
+                                    </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails sx={{ px: 3, pb: 3, pt: 0, bgcolor: '#fafafa' }}>
+                                    <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
+                                        {/* Placeholder for attendees - assuming data structure or just showing UI */}
+                                        <Box sx={{
+                                            p: 1.5,
+                                            bgcolor: 'white',
+                                            borderRadius: 2,
+                                            border: '1px solid #e5e7eb',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: 2
+                                        }}>
+                                            <PersonIcon fontSize="small" sx={{ color: '#9ca3af' }} />
+                                            <Typography variant="body2" fontWeight="500" color="#374151">
+                                                Host (You)
+                                            </Typography>
+                                        </Box>
+                                        {/* Add more attendee items here when data is available */}
+                                    </Box>
+                                </AccordionDetails>
+                            </Accordion>
+                        </Paper>
                     ))
                 ) : (
-                    <Typography variant="body1" textAlign="center" color="text.secondary">
-                        No meeting history found.
-                    </Typography>
+                    <Box sx={{ textAlign: 'center', py: 8, opacity: 0.6 }}>
+                        <Typography variant="h6" color="text.secondary" gutterBottom>
+                            No meetings yet
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Join or create a meeting to see it here.
+                        </Typography>
+                    </Box>
                 )}
             </Container>
         </Box>

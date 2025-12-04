@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
 
     const authContext = useContext(AuthContext);
 
- 
+
     const [userData, setUserData] = useState(authContext);
 
 
@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
             });
             return request.data
         } catch
-         (err) {
+        (err) {
             throw err;
         }
     }
@@ -85,8 +85,25 @@ export const AuthProvider = ({ children }) => {
     }
 
 
+    const handleGoogleLogin = async (name, username, email) => {
+        try {
+            let request = await client.post("/oauth", {
+                name: name,
+                username: username,
+                email: email
+            });
+
+            if (request.status === httpStatus.OK) {
+                localStorage.setItem("token", request.data.token);
+                router("/home")
+            }
+        } catch (err) {
+            throw err;
+        }
+    }
+
     const data = {
-        userData, setUserData, addToUserHistory, getHistoryOfUser, handleRegister, handleLogin
+        userData, setUserData, addToUserHistory, getHistoryOfUser, handleRegister, handleLogin, handleGoogleLogin
     }
 
     return (
