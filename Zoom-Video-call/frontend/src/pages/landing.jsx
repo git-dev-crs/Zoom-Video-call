@@ -29,7 +29,7 @@ export default function LandingPage() {
             display: 'flex',
             flexDirection: 'column'
         }}>
-            <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)', p: 2 }}>
+            <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', borderBottom: '3px solid #9ca3af', boxShadow: '0 6px 25px -3px rgba(0,0,0,0.35)', py: '0.75rem', px: '1rem' }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}>
@@ -77,13 +77,13 @@ export default function LandingPage() {
                                     px: 2,
                                     py: 1,
                                     color: 'white',
-                                    bgcolor: '#D5A6FF',
+                                    bgcolor: '#099be4ff',
                                     borderRadius: '8px',
                                     textTransform: 'none',
                                     boxShadow: 'none',
                                     transition: 'all 0.3s',
                                     '&:hover': {
-                                        bgcolor: '#C38BFF',
+                                        bgcolor: '#38BDF8',
                                         cursor: 'pointer',
                                         boxShadow: 'none'
                                     }
@@ -152,13 +152,13 @@ export default function LandingPage() {
                                     px: 2,
                                     py: 1,
                                     color: 'white',
-                                    bgcolor: '#D5A6FF',
+                                    bgcolor: '#0284C7',
                                     borderRadius: '8px',
                                     textTransform: 'none',
                                     boxShadow: 'none',
                                     transition: 'all 0.3s',
                                     '&:hover': {
-                                        bgcolor: '#C38BFF',
+                                        bgcolor: '#38BDF8',
                                         cursor: 'pointer',
                                         boxShadow: 'none'
                                     }
@@ -179,10 +179,11 @@ export default function LandingPage() {
                     flexDirection: { xs: 'column', md: 'row' },
                     alignItems: 'center',
                     justifyContent: 'center',
-                    minHeight: '80vh',
+                    minHeight: '60vh',
                     px: 3,
                     py: 5,
-                    gap: 3
+                    gap: 4,
+                    bgcolor: '#f9fafb'
                 }}
             >
                 <Box sx={{ p: { xs: 2, md: 4 }, width: { xs: '100%', md: '50%' } }}>
@@ -190,7 +191,7 @@ export default function LandingPage() {
                         component="h2"
                         sx={{
                             fontSize: { xs: '2rem', md: '2.5rem' },
-                            fontWeight: 600,
+                            fontWeight: 400,
                             color: '#1c1917',
                             fontFamily: 'Poppins, Inter, Montserrat, sans-serif',
                             lineHeight: 1.2,
@@ -216,7 +217,7 @@ export default function LandingPage() {
                             onClick={() => router("/aljk23")}
                             sx={{
                                 fontFamily: 'monospace',
-                                fontWeight: 600,
+                                fontWeight: 400,
                                 px: { xs: 1, md: 2 },
                                 py: 1,
                                 mr: 2,
@@ -242,14 +243,14 @@ export default function LandingPage() {
                                 px: { xs: 1, md: 2 },
                                 py: 1,
                                 mb: 1,
-                                bgcolor: '#D5A6FF',
+                                bgcolor: '#0284C7',
                                 color: 'white',
                                 borderRadius: '8px',
                                 textTransform: 'none',
                                 boxShadow: 'none',
                                 transition: 'all 0.3s',
                                 '&:hover': {
-                                    bgcolor: '#C38BFF',
+                                    bgcolor: '#38BDF8',
                                     cursor: 'pointer',
                                     boxShadow: 'none'
                                 }
