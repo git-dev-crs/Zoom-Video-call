@@ -29,7 +29,7 @@ export default function LandingPage() {
             display: 'flex',
             flexDirection: 'column'
         }}>
-            <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', borderBottom: '3px solid #9ca3af', boxShadow: '0 6px 25px -3px rgba(0,0,0,0.35)', py: '0.75rem', px: '1rem' }}>
+            <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', boxShadow: 'rgba(0, 0, 0, 0.22) 0px 4px 10px', py: '0.5rem', px: '1rem' }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}>
@@ -190,13 +190,14 @@ export default function LandingPage() {
                     <Typography
                         component="h2"
                         sx={{
-                            fontSize: { xs: '2rem', md: '2.5rem' },
-                            fontWeight: 400,
-                            color: '#1c1917',
-                            fontFamily: 'Poppins, Inter, Montserrat, sans-serif',
-                            lineHeight: 1.2,
-                            letterSpacing: '-0.02em',
-                            mb: 2
+                            fontSize: { xs: '1.5rem', md: '2rem' },
+                            fontWeight: 800,
+                            color: '#000000',
+                            fontFamily: 'Poppins, Inter, sans-serif',
+                            lineHeight: 1.3,
+                            letterSpacing: '-0.03em',
+                            mb: 2,
+                            whiteSpace: 'nowrap'
                         }}
                     >
                         Seamless Video Calling with Fliqq
@@ -214,7 +215,7 @@ export default function LandingPage() {
                     </Typography>
                     <Box>
                         <Button
-                            onClick={() => router("/aljk23")}
+                            onClick={() => router("/guest")}
                             sx={{
                                 fontFamily: 'monospace',
                                 fontWeight: 400,
@@ -243,14 +244,14 @@ export default function LandingPage() {
                                 px: { xs: 1, md: 2 },
                                 py: 1,
                                 mb: 1,
-                                bgcolor: '#0284C7',
+                                bgcolor: '#c084fc',
                                 color: 'white',
                                 borderRadius: '8px',
                                 textTransform: 'none',
                                 boxShadow: 'none',
                                 transition: 'all 0.3s',
                                 '&:hover': {
-                                    bgcolor: '#38BDF8',
+                                    bgcolor: '#a855f7',
                                     cursor: 'pointer',
                                     boxShadow: 'none'
                                 }
@@ -310,13 +311,13 @@ export default function LandingPage() {
                     <Typography
                         component="h3"
                         sx={{
-                            fontSize: { xs: '2rem', md: '2.5rem' },
-                            fontWeight: 600,
-                            color: '#1c1917',
-                            fontFamily: 'Poppins, Inter, Montserrat, sans-serif',
+                            fontSize: { xs: '2.25rem', md: '3rem' },
+                            fontWeight: 700,
+                            color: '#000000',
+                            fontFamily: 'Poppins, Inter, sans-serif',
                             lineHeight: 1.2,
-                            letterSpacing: '-0.02em',
-                            mb: 1
+                            letterSpacing: '-0.03em',
+                            mb: 2
                         }}
                     >
                         What is Fliqq?
@@ -345,13 +346,13 @@ export default function LandingPage() {
                     <Typography
                         component="h4"
                         sx={{
-                            fontSize: { xs: '2rem', md: '2.5rem' },
-                            fontWeight: 600,
-                            color: '#1c1917',
-                            fontFamily: 'Poppins, Inter, Montserrat, sans-serif',
+                            fontSize: { xs: '2.25rem', md: '3rem' },
+                            fontWeight: 700,
+                            color: '#000000',
+                            fontFamily: 'Poppins, Inter, sans-serif',
                             lineHeight: 1.2,
-                            letterSpacing: '-0.02em',
-                            mb: 1
+                            letterSpacing: '-0.03em',
+                            mb: 2
                         }}
                     >
                         Built for You
@@ -518,12 +519,12 @@ export default function LandingPage() {
                         <Typography
                             component="h4"
                             sx={{
-                                fontSize: { xs: '2rem', md: '2.5rem' },
-                                fontWeight: 600,
-                                color: '#1c1917',
-                                fontFamily: 'Poppins, Inter, Montserrat, sans-serif',
+                                fontSize: { xs: '2.25rem', md: '3rem' },
+                                fontWeight: 700,
+                                color: '#000000',
+                                fontFamily: 'Poppins, Inter, sans-serif',
                                 lineHeight: 1.2,
-                                letterSpacing: '-0.02em',
+                                letterSpacing: '-0.03em',
                                 mb: 1
                             }}
                         >
