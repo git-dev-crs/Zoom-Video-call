@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Box, Button, Container, TextField, Typography, AppBar, Toolbar, IconButton } from '@mui/material';
+import { Box, Button, Container, TextField, Typography, AppBar, Toolbar, IconButton, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CloseIcon from '@mui/icons-material/Close';
@@ -9,7 +9,15 @@ export default function GuestLobby() {
     const videoRef = useRef(null);
     const router = useNavigate();
     const [meetingCode] = useState("j99-9v5-kqn");
+    const [showMeetingCode, setShowMeetingCode] = useState(false);
+    const [copied, setCopied] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(meetingCode);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000); // Reset copied status after 2 seconds
+    };
 
     useEffect(() => {
         const getVideo = async () => {
@@ -206,6 +214,7 @@ export default function GuestLobby() {
                     {/* class="bg-purple-500 text-white px-4 py-2 m-6 rounded hover:cursor-pointer" */}
                     <Button
                         variant="contained"
+                        onClick={() => setShowMeetingCode(true)}
                         sx={{
                             bgcolor: '#0284C7',
                             color: 'white',
@@ -228,27 +237,35 @@ export default function GuestLobby() {
                     </Button>
 
                     {/* Meeting Code Section */}
-                    {/* class="flex items-center gap-2 mb-4" */}
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                        {/* class="font-medium text-gray-700" */}
-                        <Typography sx={{ fontWeight: 500, color: '#374151' }}>Meeting Code:</Typography>
+                    {showMeetingCode && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mb: 2 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Typography sx={{ fontWeight: 500, color: '#374151' }}>Meeting Code:</Typography>
 
-                        {/* class="text-purple-600 font-semibold" */}
-                        <Typography sx={{ color: '#9333ea', fontWeight: 600 }}>{meetingCode}</Typography>
+                                <Typography sx={{ color: '#9333ea', fontWeight: 600 }}>{meetingCode}</Typography>
 
-                        {/* class="p-1 rounded hover:bg-purple-100 hover:cursor-pointer transition" */}
-                        <IconButton
-                            size="small"
-                            sx={{
-                                color: '#9333ea',
-                                p: 0.5,
-                                borderRadius: 1,
-                                '&:hover': { bgcolor: '#f3e8ff' }
-                            }}
-                        >
-                            <ContentCopyIcon fontSize="small" sx={{ width: 16, height: 16 }} />
-                        </IconButton>
-                    </Box>
+                                <Tooltip title={copied ? "Copied!" : "Copy to clipboard"} placement="top">
+                                    <IconButton
+                                        size="small"
+                                        onClick={handleCopy}
+                                        sx={{
+                                            color: '#9333ea',
+                                            p: 0.5,
+                                            borderRadius: 1,
+                                            '&:hover': { bgcolor: '#f3e8ff' }
+                                        }}
+                                    >
+                                        <ContentCopyIcon fontSize="small" sx={{ width: 16, height: 16 }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </Box>
+                            {copied && (
+                                <Typography sx={{ color: '#22c55e', fontSize: '0.875rem', mt: 0.5, fontWeight: 500 }}>
+                                    Copied!
+                                </Typography>
+                            )}
+                        </Box>
+                    )}
                 </Box>
 
                 {/* Right Side: Video Preview */}
