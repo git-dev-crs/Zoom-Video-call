@@ -8,10 +8,37 @@ import { useNavigate } from 'react-router-dom';
 export default function GuestLobby() {
     const videoRef = useRef(null);
     const router = useNavigate();
-    const [meetingCode] = useState("j99-9v5-kqn");
-    const [showMeetingCode, setShowMeetingCode] = useState(false);
+    const [meetingCode, setMeetingCode] = useState("");
+    const [showMeetingCode] = useState(true); // Always visible
     const [copied, setCopied] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const generateMeetingCode = () => {
+        const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        const segment = () => {
+            let res = '';
+            for (let i = 0; i < 3; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
+            return res;
+        };
+        return `${segment()}-${segment()}-${segment()}`;
+    };
+
+    useEffect(() => {
+        // Initialize meeting code from session storage or generate new one
+        const storedCode = sessionStorage.getItem("meeting_code");
+        if (storedCode) {
+            setMeetingCode(storedCode);
+        } else {
+            const newCode = generateMeetingCode();
+            setMeetingCode(newCode);
+            sessionStorage.setItem("meeting_code", newCode);
+        }
+    }, []);
+
+    const handleJoin = () => {
+        // Navigate to the video meeting page with the meeting code
+        router(`/${meetingCode}`);
+    };
 
     const handleCopy = () => {
         navigator.clipboard.writeText(meetingCode);
@@ -39,7 +66,13 @@ export default function GuestLobby() {
             <AppBar position="static" color="transparent" elevation={0} sx={{ bgcolor: 'white', boxShadow: 'rgba(0, 0, 0, 0.22) 0px 4px 10px', py: '0.5rem', px: '1rem' }}>
                 <Container maxWidth="xl">
                     <Toolbar disableGutters sx={{ justifyContent: 'space-between' }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }} onClick={() => router('/')}>
+                        <Box
+                            sx={{ display: 'flex', alignItems: 'center', gap: 1.5, cursor: 'pointer' }}
+                            onClick={() => {
+                                sessionStorage.removeItem("meeting_code"); // Clear code so a new one generates next time
+                                router('/');
+                            }}
+                        >
                             <Box
                                 component="img"
                                 src="/fliq_logo_white.png"
@@ -214,7 +247,7 @@ export default function GuestLobby() {
                     {/* class="bg-purple-500 text-white px-4 py-2 m-6 rounded hover:cursor-pointer" */}
                     <Button
                         variant="contained"
-                        onClick={() => setShowMeetingCode(true)}
+                        onClick={handleJoin}
                         sx={{
                             bgcolor: '#0284C7',
                             color: 'white',
@@ -237,35 +270,33 @@ export default function GuestLobby() {
                     </Button>
 
                     {/* Meeting Code Section */}
-                    {showMeetingCode && (
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', mb: 2 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography sx={{ fontWeight: 500, color: '#374151' }}>Meeting Code:</Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography sx={{ fontWeight: 500, color: '#374151' }}>Meeting Code:</Typography>
 
-                                <Typography sx={{ color: '#9333ea', fontWeight: 600 }}>{meetingCode}</Typography>
+                            <Typography sx={{ color: '#9333ea', fontWeight: 600 }}>{meetingCode}</Typography>
 
-                                <Tooltip title={copied ? "Copied!" : "Copy to clipboard"} placement="top">
-                                    <IconButton
-                                        size="small"
-                                        onClick={handleCopy}
-                                        sx={{
-                                            color: '#9333ea',
-                                            p: 0.5,
-                                            borderRadius: 1,
-                                            '&:hover': { bgcolor: '#f3e8ff' }
-                                        }}
-                                    >
-                                        <ContentCopyIcon fontSize="small" sx={{ width: 16, height: 16 }} />
-                                    </IconButton>
-                                </Tooltip>
-                            </Box>
-                            {copied && (
-                                <Typography sx={{ color: '#22c55e', fontSize: '0.875rem', mt: 0.5, fontWeight: 500 }}>
-                                    Copied!
-                                </Typography>
-                            )}
+                            <Tooltip title={copied ? "Copied!" : "Copy to clipboard"} placement="bottom">
+                                <IconButton
+                                    size="small"
+                                    onClick={handleCopy}
+                                    sx={{
+                                        color: '#9333ea',
+                                        p: 0.5,
+                                        borderRadius: 1,
+                                        '&:hover': { bgcolor: '#f3e8ff' }
+                                    }}
+                                >
+                                    <ContentCopyIcon fontSize="small" sx={{ width: 16, height: 16 }} />
+                                </IconButton>
+                            </Tooltip>
                         </Box>
-                    )}
+                        {copied && (
+                            <Typography sx={{ color: '#22c55e', fontSize: '0.875rem', mt: 0.5, fontWeight: 500 }}>
+                                Copied!
+                            </Typography>
+                        )}
+                    </Box>
                 </Box>
 
                 {/* Right Side: Video Preview */}
