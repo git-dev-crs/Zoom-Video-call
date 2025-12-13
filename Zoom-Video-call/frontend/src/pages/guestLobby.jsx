@@ -12,6 +12,7 @@ export default function GuestLobby() {
     const [showMeetingCode] = useState(true); // Always visible
     const [copied, setCopied] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [mediaError, setMediaError] = useState(false);
 
     const generateMeetingCode = () => {
         const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -46,17 +47,20 @@ export default function GuestLobby() {
         setTimeout(() => setCopied(false), 2000); // Reset copied status after 2 seconds
     };
 
-    useEffect(() => {
-        const getVideo = async () => {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-                if (videoRef.current) {
-                    videoRef.current.srcObject = stream;
-                }
-            } catch (err) {
-                console.error("Error accessing media devices:", err);
+    const getVideo = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+                setMediaError(false);
             }
-        };
+        } catch (err) {
+            console.error("Error accessing media devices:", err);
+            setMediaError(true);
+        }
+    };
+
+    useEffect(() => {
         getVideo();
     }, []);
 
@@ -308,7 +312,8 @@ export default function GuestLobby() {
                     height: { md: '50vh' },
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'center'
+                    justifyContent: 'center',
+                    position: 'relative' // For overlay
                 }}>
                     {/* class="rounded-lg" */}
                     <Box
@@ -323,9 +328,34 @@ export default function GuestLobby() {
                             objectFit: 'cover',
                             borderRadius: '0.5rem', // rounded-lg
                             transform: 'scaleX(-1)',
-                            bgcolor: '#d1d5db'
+                            bgcolor: '#d1d5db',
+                            display: mediaError ? 'none' : 'block' // Hide video if error
                         }}
                     />
+
+                    {mediaError && (
+                        <Box sx={{
+                            position: 'absolute',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: 2,
+                            bgcolor: 'rgba(255,255,255,0.9)',
+                            p: 3,
+                            borderRadius: 2
+                        }}>
+                            <Typography color="error" fontWeight={600} textAlign="center">
+                                Camera Access Required
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={getVideo}
+                            >
+                                Enable Camera
+                            </Button>
+                        </Box>
+                    )}
                 </Box>
             </Box>
 
