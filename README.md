@@ -1,4 +1,4 @@
-# 📹 Zoom Video Call
+# 📹 Fliqq Video Call
 
 > A modern video conferencing web application with real-time communication features
 
@@ -32,8 +32,8 @@
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/git-dev-crs/Zoom-Video-call.git
-cd Zoom-Video-call
+git clone https://github.com/git-dev-crs/Fliqq-Video-call.git
+cd Fliqq-Video-call
 ```
 
 2. **Install dependencies**
@@ -53,7 +53,7 @@ npm start
 ## 📁 Project Structure
 
 ```
-Zoom-Video-call/
+Fliqq-Video-call/
 ├── public/           # Static files
 │   ├── index.html
 │   ├── style.css
