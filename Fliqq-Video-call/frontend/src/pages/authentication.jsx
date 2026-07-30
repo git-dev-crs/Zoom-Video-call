@@ -7,12 +7,23 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AuthContext } from '../contexts/AuthContext';
-import { Snackbar, Container, Alert } from '@mui/material';
+import { Snackbar, Container, Alert, InputAdornment, IconButton, Dialog, DialogTitle, DialogContent, DialogActions, Divider, Slide } from '@mui/material';
 import { useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+// Icons
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import LockResetIcon from '@mui/icons-material/LockReset';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+
 const defaultTheme = createTheme();
+
+// Slide-up transition for the error snackbar
+const SlideTransition = (props) => <Slide {...props} direction="down" />;
 
 export default function Authentication() {
     const [username, setUsername] = React.useState("");
@@ -21,11 +32,32 @@ export default function Authentication() {
     const [error, setError] = React.useState("");
     const [message, setMessage] = React.useState("");
     const [formState, setFormState] = React.useState(0); // 0: Login, 1: Register
-    const [open, setOpen] = React.useState(false);
+    const [open, setOpen] = React.useState(false);          // success snackbar
+    const [errorOpen, setErrorOpen] = React.useState(false); // error snackbar
     const [isAuthenticating, setIsAuthenticating] = React.useState(false);
+
+    // Password visibility toggle
+    const [showPassword, setShowPassword] = React.useState(false);
+    const [showNewPassword, setShowNewPassword] = React.useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+
+    // Forgot Password dialog state
+    const [forgotOpen, setForgotOpen] = React.useState(false);
+    const [forgotStep, setForgotStep] = React.useState(1); // 1: enter username, 2: enter new password
+    const [forgotUsername, setForgotUsername] = React.useState("");
+    const [forgotNewPassword, setForgotNewPassword] = React.useState("");
+    const [forgotConfirmPassword, setForgotConfirmPassword] = React.useState("");
+    const [forgotError, setForgotError] = React.useState("");
+    const [forgotLoading, setForgotLoading] = React.useState(false);
 
     const { handleRegister, handleLogin, handleGoogleLogin } = React.useContext(AuthContext);
     const router = useNavigate();
+
+    // ─── Show error as popup snackbar ───
+    const showError = (msg) => {
+        setError(msg);
+        setErrorOpen(true);
+    };
 
     const googleLogin = useGoogleLogin({
         onSuccess: async (tokenResponse) => {
@@ -39,11 +71,11 @@ export default function Authentication() {
                 await handleGoogleLogin(name, email, email);
             } catch (err) {
                 console.log(err);
-                setError("Google Login Failed");
+                showError("Google Login Failed. Please try again.");
                 setIsAuthenticating(false);
             }
         },
-        onError: errorResponse => console.log(errorResponse),
+        onError: () => showError("Google Sign-In was cancelled or failed."),
     });
 
     const handleAuth = async () => {
@@ -58,26 +90,99 @@ export default function Authentication() {
                 setUsername("");
                 setName("");
                 setPassword("");
-                setMessage("User registered successfully. Please Login!");
+                setMessage("Account created successfully! Please sign in.");
                 setOpen(true);
                 setError("");
-                setFormState(0); // Switch to login after success
+                setFormState(0);
                 setIsAuthenticating(false);
             }
         } catch (err) {
             console.log(err);
-            let message;
-            if (err.response && err.response.data && err.response.data.message) {
-                message = err.response.data.message;
+            let msg;
+            if (err.response && err.response.status === 401) {
+                msg = "Incorrect password. Please try again.";
+            } else if (err.response && err.response.status === 404) {
+                msg = "No account found with that username. Please check and try again.";
+            } else if (err.response && err.response.status === 409) {
+                msg = "Username already taken. Please choose a different one.";
+            } else if (err.response && err.response.data && err.response.data.message) {
+                msg = err.response.data.message;
             } else if (err.message) {
-                message = `Request Failed: ${err.message}`;
+                msg = `Connection error: ${err.message}`;
             } else {
-                message = "An unexpected error occurred";
+                msg = "Something went wrong. Please try again.";
             }
-            setError(message);
+            showError(msg);
             setIsAuthenticating(false);
         }
-    }
+    };
+
+    // ─── Forgot Password: Verify username exists ───
+    const handleForgotVerify = async () => {
+        if (!forgotUsername.trim()) {
+            setForgotError("Please enter your username.");
+            return;
+        }
+        setForgotLoading(true);
+        setForgotError("");
+        try {
+            // Try to hit a GET users endpoint to check if user exists
+            const res = await axios.get(`${process.env.REACT_APP_BACKEND_URL || "http://localhost:8000"}/api/v1/users/check_user`, {
+                params: { username: forgotUsername }
+            });
+            if (res.status === 200) {
+                setForgotStep(2);
+            }
+        } catch (err) {
+            if (err.response && err.response.status === 404) {
+                setForgotError("No account found with that username. Please check and try again.");
+            } else {
+                setForgotError("Could not verify username. Please try again.");
+            }
+        } finally {
+            setForgotLoading(false);
+        }
+    };
+
+    // ─── Forgot Password: Reset password ───
+    const handleForgotReset = async () => {
+        if (!forgotNewPassword || forgotNewPassword.length < 6) {
+            setForgotError("Password must be at least 6 characters.");
+            return;
+        }
+        if (forgotNewPassword !== forgotConfirmPassword) {
+            setForgotError("Passwords do not match.");
+            return;
+        }
+        setForgotLoading(true);
+        setForgotError("");
+        try {
+            await axios.post(`${process.env.REACT_APP_BACKEND_URL || "http://localhost:8000"}/api/v1/users/reset_password`, {
+                username: forgotUsername,
+                newPassword: forgotNewPassword
+            });
+            setForgotOpen(false);
+            setForgotStep(1);
+            setForgotUsername("");
+            setForgotNewPassword("");
+            setForgotConfirmPassword("");
+            setMessage("Password reset successfully! Please sign in with your new password.");
+            setOpen(true);
+        } catch (err) {
+            setForgotError("Failed to reset password. Please try again.");
+        } finally {
+            setForgotLoading(false);
+        }
+    };
+
+    const closeForgotDialog = () => {
+        setForgotOpen(false);
+        setForgotStep(1);
+        setForgotUsername("");
+        setForgotNewPassword("");
+        setForgotConfirmPassword("");
+        setForgotError("");
+    };
 
     if (isAuthenticating) {
         return (
@@ -90,7 +195,6 @@ export default function Authentication() {
                 bgcolor: '#ffffff',
                 position: 'relative'
             }}>
-                {/* Creative Sonar Ripple Animation */}
                 <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 4 }}>
                     <Box sx={{
                         position: 'absolute',
@@ -119,21 +223,14 @@ export default function Authentication() {
                         zIndex: 1
                     }} />
                 </Box>
-
                 <Typography sx={{ mt: 2, color: '#6b7280', fontSize: '1.1rem', fontWeight: 500, letterSpacing: '0.5px' }}>
                     Authenticating...
                 </Typography>
                 <style>
                     {`
                         @keyframes ripple {
-                            0% {
-                                transform: scale(1);
-                                opacity: 0.7;
-                            }
-                            100% {
-                                transform: scale(4);
-                                opacity: 0;
-                            }
+                            0% { transform: scale(1); opacity: 0.7; }
+                            100% { transform: scale(4); opacity: 0; }
                         }
                     `}
                 </style>
@@ -148,7 +245,7 @@ export default function Authentication() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                bgcolor: '#f9fafb', // Light gray background
+                bgcolor: '#f9fafb',
             }}>
                 <CssBaseline />
                 <Container component="main" maxWidth="xs">
@@ -158,20 +255,13 @@ export default function Authentication() {
                         flexDirection: 'column',
                         alignItems: 'center',
                         borderRadius: '16px',
-                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)' // Soft shadow
+                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
                     }}>
-                        {/* Branding Section */}
+                        {/* Branding */}
                         <Box
                             onClick={() => router('/')}
-                            sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 1.5,
-                                mb: 1,
-                                cursor: 'pointer'
-                            }}
+                            sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1, cursor: 'pointer' }}
                         >
-                            {/* Logo */}
                             <Box
                                 component="img"
                                 src="/fliq_logo_white.png"
@@ -180,7 +270,7 @@ export default function Authentication() {
                             />
                             <Typography component="h1" variant="h4" sx={{
                                 fontWeight: 800,
-                                color: '#a855f7', // Purple-500
+                                color: '#a855f7',
                                 fontFamily: 'Poppins, sans-serif'
                             }}>
                                 Fliqq
@@ -201,22 +291,18 @@ export default function Authentication() {
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
-                                    gap: '8px', // Restored optimal gap
+                                    gap: '8px',
                                     textTransform: 'none',
                                     borderColor: '#dadce0',
                                     color: '#3c4043',
                                     bgcolor: 'white',
                                     py: 1,
-                                    px: 2, // Standard padding
+                                    px: 2,
                                     borderRadius: '4px',
                                     fontSize: '1rem',
                                     fontWeight: 500,
                                     boxShadow: 'none',
-                                    '&:hover': {
-                                        bgcolor: '#f8faff',
-                                        borderColor: '#dadce0',
-                                        boxShadow: 'none'
-                                    }
+                                    '&:hover': { bgcolor: '#f8faff', borderColor: '#dadce0', boxShadow: 'none' }
                                 }}
                             >
                                 <Box component="svg" viewBox="0 0 48 48" width="20px" height="20px">
@@ -230,134 +316,98 @@ export default function Authentication() {
                                 </Typography>
                             </Button>
                         </Box>
+
                         {/* Toggle Buttons */}
                         <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
-                            <Button
-                                onClick={() => setFormState(0)}
-                                sx={{
-                                    bgcolor: formState === 0 ? '#c084fc' : '#e5e7eb', // Purple if active, Gray if not
-                                    color: formState === 0 ? 'white' : '#374151',
-                                    fontWeight: 600,
-                                    textTransform: 'none',
-                                    px: 3,
-                                    '&:hover': {
-                                        bgcolor: formState === 0 ? '#a855f7' : '#d1d5db',
-                                    }
-                                }}
-                            >
-                                Sign In
-                            </Button>
-                            <Button
-                                onClick={() => setFormState(1)}
-                                sx={{
-                                    bgcolor: formState === 1 ? '#c084fc' : '#e5e7eb',
-                                    color: formState === 1 ? 'white' : '#374151',
-                                    fontWeight: 600,
-                                    textTransform: 'none',
-                                    px: 3,
-                                    '&:hover': {
-                                        bgcolor: formState === 1 ? '#a855f7' : '#d1d5db',
-                                    }
-                                }}
-                            >
-                                Sign Up
-                            </Button>
+                            <Button onClick={() => setFormState(0)} sx={{
+                                bgcolor: formState === 0 ? '#c084fc' : '#e5e7eb',
+                                color: formState === 0 ? 'white' : '#374151',
+                                fontWeight: 600, textTransform: 'none', px: 3,
+                                '&:hover': { bgcolor: formState === 0 ? '#a855f7' : '#d1d5db' }
+                            }}>Sign In</Button>
+                            <Button onClick={() => setFormState(1)} sx={{
+                                bgcolor: formState === 1 ? '#c084fc' : '#e5e7eb',
+                                color: formState === 1 ? 'white' : '#374151',
+                                fontWeight: 600, textTransform: 'none', px: 3,
+                                '&:hover': { bgcolor: formState === 1 ? '#a855f7' : '#d1d5db' }
+                            }}>Sign Up</Button>
                         </Box>
 
                         {/* Form Fields */}
                         <Box component="form" noValidate sx={{ width: '100%' }}>
                             {formState === 1 && (
                                 <TextField
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="name"
-                                    label="Full Name"
-                                    name="name"
-                                    autoComplete="name"
-                                    value={name}
+                                    margin="normal" required fullWidth
+                                    id="name" label="Full Name" name="name"
+                                    autoComplete="name" value={name}
                                     onChange={(e) => setName(e.target.value)}
-                                    sx={{
-                                        '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                                        mb: 1,
-                                        "&:has(input:-webkit-autofill) .MuiInputLabel-root": {
-                                            transform: "translate(14px, -9px) scale(0.75)",
-                                            backgroundColor: "white",
-                                            padding: "0 4px"
-                                        }
-                                    }}
+                                    sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 }, mb: 1 }}
                                 />
                             )}
+
                             <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                id="username"
-                                label="Email / Username"
-                                name="username"
-                                autoComplete="username"
-                                autoFocus
-                                value={username}
+                                margin="normal" required fullWidth
+                                id="username" label="Email / Username" name="username"
+                                autoComplete="username" autoFocus value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                                    mb: 1,
-                                    "&:has(input:-webkit-autofill) .MuiInputLabel-root": {
-                                        transform: "translate(14px, -9px) scale(0.75)",
-                                        backgroundColor: "white",
-                                        padding: "0 4px"
-                                    }
-                                }}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 }, mb: 1 }}
                             />
+
+                            {/* FIX: Password field with visibility toggle eye icon */}
                             <TextField
-                                margin="normal"
-                                required
-                                fullWidth
-                                name="password"
-                                label="Password"
-                                type="password"
-                                id="password"
-                                autoComplete="current-password"
+                                margin="normal" required fullWidth
+                                name="password" label="Password"
+                                type={showPassword ? "text" : "password"}
+                                id="password" autoComplete="current-password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                sx={{
-                                    '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                                    mb: 2,
-                                    "&:has(input:-webkit-autofill) .MuiInputLabel-root": {
-                                        transform: "translate(14px, -9px) scale(0.75)",
-                                        backgroundColor: "white",
-                                        padding: "0 4px"
-                                    }
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 }, mb: 1 }}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton
+                                                aria-label="toggle password visibility"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                edge="end"
+                                            >
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
                                 }}
                             />
 
-                            {/* Error Message */}
-                            {error && (
-                                <Typography color="error" variant="body2" sx={{ textAlign: 'center', mb: 2 }}>
-                                    {error}
-                                </Typography>
+                            {/* FIX: Forgot Password link */}
+                            {formState === 0 && (
+                                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                                    <Typography
+                                        variant="body2"
+                                        onClick={() => setForgotOpen(true)}
+                                        sx={{
+                                            color: '#a855f7',
+                                            cursor: 'pointer',
+                                            fontWeight: 500,
+                                            fontSize: '0.82rem',
+                                            '&:hover': { textDecoration: 'underline' }
+                                        }}
+                                    >
+                                        Forgot Password?
+                                    </Typography>
+                                </Box>
                             )}
 
                             {/* Submit Button */}
                             <Button
-                                fullWidth
-                                variant="contained"
+                                fullWidth variant="contained"
                                 onClick={handleAuth}
                                 sx={{
-                                    mt: 1,
-                                    mb: 2,
-                                    bgcolor: '#c084fc', // Purple-400
-                                    color: 'white',
-                                    py: 1.5,
-                                    fontSize: '1rem',
-                                    fontWeight: 600,
-                                    borderRadius: '8px',
-                                    textTransform: 'none',
+                                    mt: 1, mb: 2,
+                                    bgcolor: '#c084fc',
+                                    color: 'white', py: 1.5,
+                                    fontSize: '1rem', fontWeight: 600,
+                                    borderRadius: '8px', textTransform: 'none',
                                     boxShadow: 'none',
-                                    '&:hover': {
-                                        bgcolor: '#a855f7', // Purple-500
-                                        boxShadow: 'none'
-                                    }
+                                    '&:hover': { bgcolor: '#a855f7', boxShadow: 'none' }
                                 }}
                             >
                                 {formState === 0 ? "Login" : "Register"}
@@ -367,15 +417,206 @@ export default function Authentication() {
                 </Container>
             </Box>
 
+            {/* ── SUCCESS Snackbar ── */}
             <Snackbar
                 open={open}
                 onClose={() => setOpen(false)}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                autoHideDuration={4000}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                TransitionComponent={SlideTransition}
             >
-                <Alert onClose={() => setOpen(false)} severity="success" variant="filled" sx={{ width: '100%', bgcolor: '#4caf50' }}>
+                <Alert
+                    onClose={() => setOpen(false)}
+                    severity="success"
+                    variant="filled"
+                    icon={<CheckCircleOutlineIcon />}
+                    sx={{ width: '100%', bgcolor: '#4caf50', borderRadius: 2, fontWeight: 600 }}
+                >
                     {message}
                 </Alert>
             </Snackbar>
+
+            {/* FIX: ERROR Snackbar popup — replaces inline red text */}
+            <Snackbar
+                open={errorOpen}
+                onClose={() => setErrorOpen(false)}
+                autoHideDuration={5000}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+                TransitionComponent={SlideTransition}
+            >
+                <Alert
+                    onClose={() => setErrorOpen(false)}
+                    severity="error"
+                    variant="filled"
+                    icon={<ErrorOutlineIcon />}
+                    sx={{
+                        width: '100%',
+                        borderRadius: 2,
+                        fontWeight: 600,
+                        fontSize: '0.95rem',
+                        bgcolor: '#d32f2f',
+                        boxShadow: '0 8px 32px rgba(211,47,47,0.35)'
+                    }}
+                >
+                    {error}
+                </Alert>
+            </Snackbar>
+
+            {/* ── FORGOT PASSWORD DIALOG ── */}
+            <Dialog
+                open={forgotOpen}
+                onClose={closeForgotDialog}
+                maxWidth="xs"
+                fullWidth
+                PaperProps={{
+                    sx: {
+                        borderRadius: 3,
+                        p: 1,
+                        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)'
+                    }
+                }}
+            >
+                <DialogTitle sx={{ pb: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <LockResetIcon sx={{ color: '#a855f7', fontSize: 28 }} />
+                        <Box>
+                            <Typography variant="h6" fontWeight={700} color="#1f2937">
+                                {forgotStep === 1 ? "Forgot Password?" : "Set New Password"}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {forgotStep === 1
+                                    ? "Enter your username to reset your password"
+                                    : `Setting new password for: ${forgotUsername}`}
+                            </Typography>
+                        </Box>
+                    </Box>
+                </DialogTitle>
+
+                <Divider />
+
+                <DialogContent sx={{ pt: 2 }}>
+                    {/* Step 1: Enter username */}
+                    {forgotStep === 1 && (
+                        <Box>
+                            <Box sx={{
+                                display: 'flex', alignItems: 'center', gap: 1,
+                                bgcolor: '#fef3c7', borderRadius: 2, p: 1.5, mb: 2
+                            }}>
+                                <WarningAmberIcon sx={{ color: '#f59e0b', fontSize: 20 }} />
+                                <Typography variant="body2" color="#92400e" fontWeight={500}>
+                                    Enter the username you registered with
+                                </Typography>
+                            </Box>
+                            <TextField
+                                fullWidth autoFocus
+                                label="Username"
+                                value={forgotUsername}
+                                onChange={(e) => { setForgotUsername(e.target.value); setForgotError(""); }}
+                                onKeyDown={(e) => e.key === 'Enter' && handleForgotVerify()}
+                                error={!!forgotError}
+                                helperText={forgotError}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                            />
+                        </Box>
+                    )}
+
+                    {/* Step 2: Enter new password */}
+                    {forgotStep === 2 && (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Box sx={{
+                                display: 'flex', alignItems: 'center', gap: 1,
+                                bgcolor: '#f0fdf4', borderRadius: 2, p: 1.5
+                            }}>
+                                <CheckCircleOutlineIcon sx={{ color: '#22c55e', fontSize: 20 }} />
+                                <Typography variant="body2" color="#15803d" fontWeight={500}>
+                                    Username verified! Now set a new password.
+                                </Typography>
+                            </Box>
+
+                            <TextField
+                                fullWidth autoFocus
+                                label="New Password"
+                                type={showNewPassword ? "text" : "password"}
+                                value={forgotNewPassword}
+                                onChange={(e) => { setForgotNewPassword(e.target.value); setForgotError(""); }}
+                                error={!!forgotError}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShowNewPassword(!showNewPassword)} edge="end">
+                                                {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
+                            />
+
+                            <TextField
+                                fullWidth
+                                label="Confirm New Password"
+                                type={showConfirmPassword ? "text" : "password"}
+                                value={forgotConfirmPassword}
+                                onChange={(e) => { setForgotConfirmPassword(e.target.value); setForgotError(""); }}
+                                error={!!forgotError}
+                                helperText={forgotError}
+                                onKeyDown={(e) => e.key === 'Enter' && handleForgotReset()}
+                                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                                                {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    )
+                                }}
+                            />
+                        </Box>
+                    )}
+                </DialogContent>
+
+                <DialogActions sx={{ px: 3, pb: 2, gap: 1 }}>
+                    <Button
+                        onClick={closeForgotDialog}
+                        sx={{ color: '#6b7280', textTransform: 'none', fontWeight: 600 }}
+                    >
+                        Cancel
+                    </Button>
+
+                    {forgotStep === 1 && (
+                        <Button
+                            variant="contained"
+                            onClick={handleForgotVerify}
+                            disabled={forgotLoading}
+                            sx={{
+                                bgcolor: '#a855f7', color: 'white',
+                                textTransform: 'none', fontWeight: 700,
+                                borderRadius: 2, px: 3,
+                                '&:hover': { bgcolor: '#9333ea' }
+                            }}
+                        >
+                            {forgotLoading ? "Checking..." : "Continue →"}
+                        </Button>
+                    )}
+
+                    {forgotStep === 2 && (
+                        <Button
+                            variant="contained"
+                            onClick={handleForgotReset}
+                            disabled={forgotLoading}
+                            sx={{
+                                bgcolor: '#22c55e', color: 'white',
+                                textTransform: 'none', fontWeight: 700,
+                                borderRadius: 2, px: 3,
+                                '&:hover': { bgcolor: '#16a34a' }
+                            }}
+                        >
+                            {forgotLoading ? "Resetting..." : "Reset Password"}
+                        </Button>
+                    )}
+                </DialogActions>
+            </Dialog>
         </ThemeProvider>
     );
 }

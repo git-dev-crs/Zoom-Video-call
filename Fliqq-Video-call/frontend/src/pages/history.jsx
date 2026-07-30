@@ -2,20 +2,15 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import {
-    AppBar,
     Box,
-    Card,
-    CardContent,
     Container,
-    IconButton,
-    Toolbar,
     Typography,
     Accordion,
     AccordionSummary,
     AccordionDetails,
-    Divider,
     Paper
 } from '@mui/material';
+
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';

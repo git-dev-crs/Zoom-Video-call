@@ -92,6 +92,9 @@ export default function VideoMeetComponent() {
                 socketRef.current = null;
             }
         };
+        // Intentionally run once on mount only — adding getPermissions/getMedia to deps
+        // would cause infinite re-renders since they are recreated each render.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
     let getDislayMedia = () => {
@@ -152,6 +155,9 @@ export default function VideoMeetComponent() {
 
         }
 
+        // Intentionally runs whenever video/audio state changes.
+        // getUserMedia is not in deps to avoid infinite loops (recreated each render).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [video, audio])
     let getMedia = () => {
         setVideo(videoAvailable);
@@ -168,10 +174,13 @@ export default function VideoMeetComponent() {
         window.localStream = stream
         localVideoref.current.srcObject = stream
 
+        // FIX: Use addTrack (modern) instead of deprecated addStream
         for (let id in connections) {
             if (id === socketIdRef.current) continue
 
-            connections[id].addStream(window.localStream)
+            stream.getTracks().forEach(track => {
+                connections[id].addTrack(track, stream)
+            })
 
             connections[id].createOffer().then((description) => {
                 console.log(description)
@@ -197,7 +206,10 @@ export default function VideoMeetComponent() {
             localVideoref.current.srcObject = window.localStream
 
             for (let id in connections) {
-                connections[id].addStream(window.localStream)
+                // FIX: Use addTrack for the blank silence stream too
+                window.localStream.getTracks().forEach(track => {
+                    connections[id].addTrack(track, window.localStream)
+                })
 
                 connections[id].createOffer().then((description) => {
                     connections[id].setLocalDescription(description)
@@ -237,10 +249,13 @@ export default function VideoMeetComponent() {
         window.localStream = stream
         localVideoref.current.srcObject = stream
 
+        // FIX: Use addTrack (modern) instead of deprecated addStream
         for (let id in connections) {
             if (id === socketIdRef.current) continue
 
-            connections[id].addStream(window.localStream)
+            stream.getTracks().forEach(track => {
+                connections[id].addTrack(track, stream)
+            })
 
             connections[id].createOffer().then((description) => {
                 connections[id].setLocalDescription(description)
@@ -323,34 +338,38 @@ export default function VideoMeetComponent() {
                         }
                     }
 
-                    // Wait for their video stream
-                    connections[socketListId].onaddstream = (event) => {
-                        console.log("BEFORE:", videoRef.current);
-                        console.log("FINDING ID: ", socketListId);
+                    // FIX: Use modern ontrack instead of deprecated onaddstream
+                    // ontrack fires for each individual track. We build a MediaStream from them.
+                    const remoteStreams = {};
+                    connections[socketListId].ontrack = (event) => {
+                        console.log("ontrack fired for:", socketListId);
+
+                        // Build or reuse a MediaStream for this peer
+                        if (!remoteStreams[socketListId]) {
+                            remoteStreams[socketListId] = new MediaStream();
+                        }
+                        remoteStreams[socketListId].addTrack(event.track);
+                        const stream = remoteStreams[socketListId];
 
                         let videoExists = videoRef.current.find(video => video.socketId === socketListId);
 
                         if (videoExists) {
-                            console.log("FOUND EXISTING");
-
-                            // Update the stream of the existing video
+                            console.log("FOUND EXISTING - updating stream");
                             setVideos(videos => {
                                 const updatedVideos = videos.map(video =>
-                                    video.socketId === socketListId ? { ...video, stream: event.stream } : video
+                                    video.socketId === socketListId ? { ...video, stream: stream } : video
                                 );
                                 videoRef.current = updatedVideos;
                                 return updatedVideos;
                             });
                         } else {
-                            // Create a new video
-                            console.log("CREATING NEW");
+                            console.log("CREATING NEW video entry");
                             let newVideo = {
                                 socketId: socketListId,
-                                stream: event.stream,
+                                stream: stream,
                                 autoplay: true,
                                 playsinline: true
                             };
-
                             setVideos(videos => {
                                 const updatedVideos = [...videos, newVideo];
                                 videoRef.current = updatedVideos;
@@ -359,14 +378,17 @@ export default function VideoMeetComponent() {
                         }
                     };
 
-
-                    // Add the local video stream
+                    // FIX: Use addTrack (modern) instead of deprecated addStream
                     if (window.localStream !== undefined && window.localStream !== null) {
-                        connections[socketListId].addStream(window.localStream)
+                        window.localStream.getTracks().forEach(track => {
+                            connections[socketListId].addTrack(track, window.localStream)
+                        })
                     } else {
                         let blackSilence = (...args) => new MediaStream([black(...args), silence()])
                         window.localStream = blackSilence()
-                        connections[socketListId].addStream(window.localStream)
+                        window.localStream.getTracks().forEach(track => {
+                            connections[socketListId].addTrack(track, window.localStream)
+                        })
                     }
                 })
 
@@ -375,7 +397,10 @@ export default function VideoMeetComponent() {
                         if (id2 === socketIdRef.current) continue
 
                         try {
-                            connections[id2].addStream(window.localStream)
+                            // FIX: Use addTrack for renegotiation
+                            window.localStream.getTracks().forEach(track => {
+                                connections[id2].addTrack(track, window.localStream)
+                            })
                         } catch (e) { }
 
                         connections[id2].createOffer().then((description) => {
@@ -419,6 +444,9 @@ export default function VideoMeetComponent() {
         if (screen !== undefined) {
             getDislayMedia();
         }
+        // Intentionally runs only when screen state changes.
+        // getDislayMedia not in deps to avoid infinite loops (recreated each render).
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [screen])
     let handleScreen = () => {
         setScreen(!screen);
@@ -433,17 +461,6 @@ export default function VideoMeetComponent() {
         setTimeout(() => {
             window.location.href = "/home";
         }, 2000);
-    }
-
-    let openChat = () => {
-        setModal(true);
-        setNewMessages(0);
-    }
-    let closeChat = () => {
-        setModal(false);
-    }
-    let handleMessage = (e) => {
-        setMessage(e.target.value);
     }
 
     const addMessage = (data, sender, socketIdSender) => {

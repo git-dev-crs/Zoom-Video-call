@@ -21,8 +21,9 @@ import CloseIcon from '@mui/icons-material/Close';
 export default function LandingPage() {
     const router = useNavigate();
     const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+    useMediaQuery(theme.breakpoints.down('md')); // kept for potential future use
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
     const { getUserDetails } = useContext(AuthContext);
     const [userData, setUserData] = useState(null);
 

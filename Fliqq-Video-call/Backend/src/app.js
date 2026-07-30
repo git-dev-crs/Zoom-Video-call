@@ -6,8 +6,8 @@ import cors from "cors";
 import userRoutes from "./routes/users.routes.js"
 
 import { connectToSocket } from "./controllers/socketManager.js";
-import { connect } from "node:http2";
 import dotenv from "dotenv";
+
 dotenv.config();
 // await mongoose.connect(process.env.MONGO_URI);
 

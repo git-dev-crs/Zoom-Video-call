@@ -56,6 +56,9 @@ function Dashboard() {
             }
         }
         fetchUser();
+        // getUserDetails comes from AuthContext and is a new reference each render.
+        // This effect intentionally runs once on mount to load user data.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleJoinVideoCall = () => {

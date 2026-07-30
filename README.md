@@ -85,3 +85,6 @@ We welcome contributions!
 [![Portfolio](https://img.shields.io/badge/Portfolio-Visit-FF5722?style=flat&logo=google-chrome&logoColor=white)](https://mohit-portfolio-teal.vercel.app/)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/mohit-jatav-6819a0260/)
 [![Email](https://img.shields.io/badge/Email-Contact-D14836?style=flat&logo=gmail&logoColor=white)](mailto:mohitjatav326@gmail.com)
+---
+<p align="center">Made by Mohit Jatav</p>
+

@@ -10,7 +10,6 @@ export default function GuestLobby() {
     const videoRef = useRef(null);
     const router = useNavigate();
     const [meetingCode, setMeetingCode] = useState("");
-    const [showMeetingCode] = useState(true); // Always visible
     const [copied, setCopied] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [mediaError, setMediaError] = useState("");

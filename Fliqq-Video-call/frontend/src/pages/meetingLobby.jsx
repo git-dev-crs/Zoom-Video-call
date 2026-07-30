@@ -86,10 +86,13 @@ function MeetingLobby() {
     };
 
     useEffect(() => {
+        // FIX: Capture ref at the TOP of the effect so ESLint knows it's stable
+        // and it's available in the cleanup even after unmount clears videoRef.current
+        const videoEl = videoRef.current;
         getVideo();
         return () => {
-            if (videoRef.current && videoRef.current.srcObject) {
-                const tracks = videoRef.current.srcObject.getTracks();
+            if (videoEl && videoEl.srcObject) {
+                const tracks = videoEl.srcObject.getTracks();
                 tracks.forEach(track => track.stop());
             }
         }

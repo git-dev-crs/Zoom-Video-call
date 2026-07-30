@@ -211,4 +211,54 @@ const updateUserDetails = async (req, res) => {
     }
 }
 
-export { login, register, getUserHistory, addToHistory, googleAuth, getUserDetails, updateUserDetails }
+const checkUser = async (req, res) => {
+    const { username } = req.query;
+
+    if (!username) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: "Username is required" });
+    }
+
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({ message: "No account found with that username" });
+        }
+        // Only confirm existence — don't return any sensitive data
+        return res.status(httpStatus.OK).json({ message: "User found" });
+    } catch (e) {
+        console.error("Check User Error:", e);
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: `Error: ${e.message}` });
+    }
+}
+
+const resetPassword = async (req, res) => {
+    const { username, newPassword } = req.body;
+
+    if (!username || !newPassword) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: "Username and new password are required" });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: "Password must be at least 6 characters" });
+    }
+
+    try {
+        const user = await User.findOne({ username });
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({ message: "User not found" });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        // Invalidate old token so they must log in again with the new password
+        user.token = null;
+        await user.save();
+
+        return res.status(httpStatus.OK).json({ message: "Password reset successfully" });
+    } catch (e) {
+        console.error("Reset Password Error:", e);
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: `Error: ${e.message}` });
+    }
+}
+
+export { login, register, getUserHistory, addToHistory, googleAuth, getUserDetails, updateUserDetails, checkUser, resetPassword }

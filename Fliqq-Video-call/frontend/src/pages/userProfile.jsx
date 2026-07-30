@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Container, Paper, TextField, Button, Avatar, Grid, IconButton } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
+import { Box, Typography, Container, Paper, TextField, Button, Avatar, Grid } from '@mui/material';
 import { AuthContext } from '../contexts/AuthContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -12,7 +11,6 @@ function UserProfile() {
     const { getUserDetails, updateUserProfile } = useContext(AuthContext);
     const [loading, setLoading] = useState(true);
     const [loadingMessage, setLoadingMessage] = useState("Loading Profile...");
-    const [isEditing, setIsEditing] = useState(false);
     const [editingBio, setEditingBio] = useState(false);
     const [editingLocation, setEditingLocation] = useState(false);
     const [editingName, setEditingName] = useState(false);
@@ -88,6 +86,9 @@ function UserProfile() {
             }, 2000);
         }
         fetchUser();
+        // getUserDetails comes from AuthContext and is a new reference each render.
+        // This effect intentionally runs once on mount to load profile data.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const handleChange = (e) => {
@@ -98,7 +99,6 @@ function UserProfile() {
 
 
     const handleSave = async () => {
-        setIsEditing(false);
         try {
             const token = localStorage.getItem("token");
             if (!token) {
